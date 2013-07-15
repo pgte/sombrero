@@ -87,3 +87,33 @@ db.get('name', function(err, names) {
 
 });
 ```
+
+## Data Partitioning
+
+Although Dynamo databases partition the data based on a distributed hash table algorythm, Sombrero behaves differently.
+
+Each database is stored on N servers. The partitioning of the data is left up to the user. This makes possible to do fast local reads, range queries and for server affinity to work.
+
+### Affinity
+
+When you instantiate a sombrero database, if sombrero finds out that the database is already on the cluster, it uses the database remotely.
+
+But you may force it to be local based on an option:
+
+```javascript
+var dbOptions = {
+  local: true
+};
+
+var db = Sombrero.db('mydatabase', options);
+```
+
+In this case the database will emit a `local` event when the entire database is available locally. This may be useful if you want to perform queries only after the data has been made local:
+
+```javascript
+db.once('local', function() {
+  console.log('now all data is local, now I can query it really fast');
+});
+```
+
+Before this event all queries are made remotely.
