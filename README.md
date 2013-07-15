@@ -84,8 +84,34 @@ Then you will get an array on get operations:
 ```javascript
 db.get('name', function(err, names) {
   console.log('got %d names', names.length);
-
 });
+```
+
+### Resolving conflicts
+
+You will get mutiple values if you have conflicts. When you get a conflict, you have the chance to resolve it:
+
+```javascript
+db.get('name', function(err, names) {
+  console.log('got %d names', names.length);
+
+  if (names.length > 1) {
+    // opting to resolve this conflict by using names[0];
+    db.resolve(names, name[0], function(err) {
+
+    });
+  }
+});
+```
+
+You can also opt for doing the resolution out of the `get` callback:
+
+```javascript
+db.resolver = function(values, cb) {
+  // here we resolve by using the first value,
+  // but you could be more fancy than that
+  cb(values[0]);
+};
 ```
 
 ## Data Partitioning
