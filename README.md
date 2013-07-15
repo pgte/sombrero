@@ -11,7 +11,15 @@ $ npm install sombrero --save
 ## Require
 
 ```javascript
+var clusterName = 'mycluster';
 var Sombrero = require('sombrero');
+```
+
+## Create Node
+
+```javascript
+var clusterName = 'mycluster'
+var node = Sombrero.Node(clusterName);
 ```
 
 ## Configure
@@ -19,13 +27,52 @@ var Sombrero = require('sombrero');
 By default sombrero puts all the LevelDB files inside the `.sombrero` directory inside the current working directory, but you can change that:
 
 ```javascript
-Sombrero.base = '/path/to/my/sombrero/dir';
+var options = {
+  cluster: 'mycluster',
+  base: '/path/to/my/sombrero/dir'
+};
+
+var node = Sombrero(options);
 ```
 
-## Instantiate
+## Discover Cluster
+
+By default Sombrero uses Bonjour on the local network to find other nodes.
+
+You help a node discover other cluster nodes by pointing it to a URL that contains an array of
 
 ```javascript
-var db = Sombrero.db('mydatabase');
+node.cluster.discoverOthersUsing('http://registry.acme.com/cluster/hosts.json');
+```
+
+The cluster.json file should be something like this:
+
+```javascript
+[
+  {
+    "host": "one.node.acme.com",
+    "port": 8283
+  },
+  {
+    "host": "two.node.acme.com",
+    "port": 9183
+  },
+]
+```
+
+## Database
+
+You can get a reference to a database using:
+
+```javascript
+var db = node.db('mydatabase');
+```
+
+If you get the same database repeatedly you get a reference to the same object:
+
+```javascript
+var db2 = node.db('mydatabase');
+assert.deepEqual(db, db2);
 ```
 
 ## Listen for changes
@@ -67,47 +114,14 @@ PENDING
 
 ## Dynamo-like tweaks
 
-### Multiple Values
-
-By default a database does not allow multiple values for the same database, but you can configure it to if you need to handle conflict resolution:
-
-```javascript
-var dbOptions = {
-  multiple: true
-};
-
-var db = Sombrero.db('mydatabase', options);
-```
-
-Then you will get an array on get operations:
-
-```javascript
-db.get('name', function(err, names) {
-  console.log('got %d names', names.length);
-});
-```
-
 ### Resolving conflicts
 
-You will get mutiple values if you have conflicts. When you get a conflict, you have the chance to resolve it:
+When a network partition occurs or you have concurrent writes to the same key you will get conflicts. By default Sombrero resolves conflicts by selecting the latest update ("last write wins" - LWW).
+
+You can override this method by implementing `db.resolve`:
 
 ```javascript
-db.get('name', function(err, names) {
-  console.log('got %d names', names.length);
-
-  if (names.length > 1) {
-    // opting to resolve this conflict by using names[0];
-    db.resolve(names, name[0], function(err) {
-
-    });
-  }
-});
-```
-
-You can also opt for doing the resolution out of the `get` callback:
-
-```javascript
-db.resolver = function(values, cb) {
+db.resolve = function(values, cb) {
   // here we resolve by using the first value,
   // but you could be more fancy than that
   cb(values[0]);
@@ -143,3 +157,75 @@ db.once('local', function() {
 ```
 
 Before this event all queries are made remotely.
+
+
+### CAP Controls
+
+Sombrero lets you tune consistency, latency and availability by letting you configure 3 options per database: (N, R and W).
+
+## N
+
+N represents the number of nodes that Sombrero will try to replicate your database to. By default this is 3.
+
+You can change this by setting the `n` db option:
+
+```javascript
+var options = {
+  n: 4
+};
+
+var db = node.db('mydatabase', options);
+```
+
+## W — Write Quorum
+
+W represents the number of nodes that must report success before an update is considered complete. Defaults to `2`;
+
+If you only care about the local node when writing, set `w` to 1.
+
+You can set `w` at the db level:
+
+```javascript
+var options = {
+  w: 3
+};
+
+var db = node.db('mydatabase', options);
+```
+
+And you can override it on a specific `put` command:
+
+```javascript
+var writeOptions = {
+  w: 1
+};
+db.put('name', 'Sobrero', writeOptions);
+```
+
+## R - Read Quorum
+
+R represents the number of nodes that must return results before a read is considered successful. By default this value is `2`;
+
+You can set `w` at the db level:
+
+```javascript
+var options = {
+  r: 3
+};
+
+var db = node.db('mydatabase', options, function(err) {
+  // ...
+});
+```
+
+And you can override it on a specific `get` command:
+
+```javascript
+var readOptions = {
+  r: 3
+};
+
+db.get('name', readOptions, function(err, value) {
+  // ...
+});
+```
