@@ -1,0 +1,24 @@
+{
+  "name": "sombrero",
+  "version": "0.0.1",
+  "description": "Dynamo-like Data Storage System for Node.js Using LevelDB.",
+  "main": "index.js",
+  "scripts": {
+    "test": "tap tests/*.test.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/pgte/sombrero.git"
+  },
+  "keywords": [
+    "dynamo",
+    "redis",
+    "database",
+    "distributed"
+  ],
+  "author": "pgte",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/pgte/sombrero/issues"
+  }
+}
