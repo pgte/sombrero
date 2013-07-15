@@ -39,7 +39,7 @@ var node = Sombrero(options);
 
 By default Sombrero uses Bonjour on the local network to find other nodes.
 
-You help a node discover other cluster nodes by pointing it to a URL that contains an array of
+You can help a node discover other cluster nodes by pointing it to a URL that contains an array of hosts and ports:
 
 ```javascript
 node.cluster.discoverOthersUsing('http://registry.acme.com/cluster/hosts.json');
@@ -56,7 +56,7 @@ The cluster.json file should be something like this:
   {
     "host": "two.node.acme.com",
     "port": 9183
-  },
+  }
 ]
 ```
 
@@ -88,6 +88,11 @@ liveStream.on('readable', function() {
   }
 });
 ```
+
+Type can be any of the following:
+
+* `put`
+* `del`
 
 ## Write a key to it
 
@@ -229,3 +234,4 @@ db.get('name', readOptions, function(err, value) {
   // ...
 });
 ```
+
