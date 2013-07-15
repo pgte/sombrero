@@ -20,5 +20,11 @@
   "license": "MIT",
   "bugs": {
     "url": "https://github.com/pgte/sombrero/issues"
+  },
+  "dependencies": {
+    "level": "~0.10.0"
+  },
+  "devDependencies": {
+    "tap": "*"
   }
 }

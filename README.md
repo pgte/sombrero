@@ -93,6 +93,7 @@ Type can be any of the following:
 
 * `put`
 * `del`
+* `batch`
 
 ## Write a key to it
 
