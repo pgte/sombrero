@@ -44,5 +44,6 @@ LocalDB.prototype.close = function close(cb) {
 }
 
 function onClosed() {
+  this._closed = true;
   this.emit('closed');
 }
