@@ -27,7 +27,7 @@ test('starts local db', function(t) {
 test('can put', function(t) {
 
   var streams = AttachedStream();
-  var serverPeer = ServerPeer(streams.server, node, db);
+  var serverPeer = ServerPeer(streams.server, db);
 
   var requestId = 1;
   streams.client.write(JSON.stringify(['put', requestId ++, prefix + 'A', 'v1']) + '\n');
@@ -53,7 +53,7 @@ test('can put', function(t) {
 
 test('can get', function(t) {
   var streams = AttachedStream();
-  var serverPeer = ServerPeer(streams.server, node, db);
+  var serverPeer = ServerPeer(streams.server, db);
 
   var requestId = 1;
   streams.client.write(JSON.stringify(['get', requestId ++, prefix + 'A']) + '\n');
@@ -80,7 +80,7 @@ test('can get', function(t) {
 
 test('can create a read stream', function(t) {
   var streams = AttachedStream();
-  var serverPeer = ServerPeer(streams.server, node, db);
+  var serverPeer = ServerPeer(streams.server, db);
 
   var requestId = 1;
   var streamOptions = {
@@ -110,7 +110,7 @@ test('can create a read stream', function(t) {
 
 test('can create a write stream', function(t) {
   var streams = AttachedStream();
-  var serverPeer = ServerPeer(streams.server, node, db);
+  var serverPeer = ServerPeer(streams.server, db);
 
   streams.client.write(JSON.stringify(['writeStream', 1]) + '\n');
   streams.client.write(JSON.stringify(['write', 1, {key: prefix + 'C', value: 'v3'}]) + '\n');

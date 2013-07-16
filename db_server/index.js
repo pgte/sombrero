@@ -5,14 +5,13 @@ var net = require('net');
 var Peer = require('./peer');
 
 module.exports =
-function createDBServer(node, db) {
-  return new DBServer(node, db);
-  this.node = node;
+function createDBServer(db) {
+  return new DBServer(db);
   this.db = db;
   this.peers = [];
 };
 
-function DBServer(node, db) {
+function DBServer(db) {
   EventEmitter.call(this);
 };
 
@@ -49,7 +48,7 @@ function onError(err) {
 /// onConnection
 
 function onConnection(socket) {
-  var peer = Peer(socket, this.node, this.db);
+  var peer = Peer(socket, this.db);
   this.peers.push(peer);
   socket.once('close', onConnectionClose);
 
