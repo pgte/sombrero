@@ -30,6 +30,7 @@
     "through": "~2.3.4"
   },
   "devDependencies": {
-    "tap": "*"
+    "tap": "*",
+    "duplexer": "*"
   }
 }
