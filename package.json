@@ -24,7 +24,10 @@
   "dependencies": {
     "level": "~0.10.0",
     "mkdirp": "~0.3.5",
-    "async": "~0.2.9"
+    "async": "~0.2.9",
+    "stream-combiner": "0.0.2",
+    "split": "~0.2.6",
+    "through": "~2.3.4"
   },
   "devDependencies": {
     "tap": "*"
