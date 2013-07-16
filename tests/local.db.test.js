@@ -26,8 +26,13 @@ test('the same node name gets the same object', function(t) {
 });
 
 test('closes node', function(t) {
-  // here just to check if node.close can be called twice
+  // the followint 2 lines are here just to check
+  // if db.close can be called twice
+  db.close();
   node.close();
 
-  node.close(t.end.bind(t));
+  // verifying that we get calledback after closing
+  setTimeout(function() {
+    node.close(t.end.bind(t));
+  }, 500);
 });

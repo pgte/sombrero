@@ -15,6 +15,7 @@ function LocalDB(node, name, options) {
   mkdirp.sync(this.base);
 
   this._closing = false;
+  this._closed = false;
 
   this.db = level(this.base);
 
@@ -35,6 +36,8 @@ LocalDB.prototype.close = function close(cb) {
   if (! this._closing) {
     this._closing = true;
     this.db.close(cb);
+  } else if (this._closed && cb) {
+    cb()
   } else if (cb) {
     this.db.once('closed', cb);
   }
