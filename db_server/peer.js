@@ -1,7 +1,7 @@
 var EventEmitter = require('events').EventEmitter;
 var inherits = require('util').inherits;
 
-var PeerEmitter = require('../peer_emitter');
+var DuplexEmitter = require('duplex-emitter');
 
 module.exports =
 function createPeer(stream, node, db) {
@@ -11,7 +11,7 @@ function createPeer(stream, node, db) {
 function Peer(stream, node, db) {
   EventEmitter.call(this);
 
-  var emitter = PeerEmitter(stream);
+  var emitter = DuplexEmitter(stream);
   this._emitter = emitter;
 
   this._streams = {};
