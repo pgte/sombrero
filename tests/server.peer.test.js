@@ -78,6 +78,34 @@ test('can get', function(t) {
 
 });
 
+test('can create read stream', function(t) {
+  var streams = AttachedStream();
+  var serverPeer = ServerPeer(streams.server, node, db);
+
+  var requestId = 1;
+  var streamOptions = {
+    start: prefix + 'A',
+    end: prefix + 'B'
+  };
+  streams.client.write(JSON.stringify(['read', requestId ++, streamOptions]) + '\n');
+
+  var replies = [];
+  streams.client.on('data', function(d) {
+    replies.push(d);
+    t.ok(replies.length <= 3);
+    if (replies.length == 3) done()
+  });
+
+  function done() {
+    var expectedReplies = [
+      JSON.stringify(['read', 1, {key: prefix + 'A', value: 'v1'}]),
+      JSON.stringify(['read', 1, {key: prefix + 'B', value: 'v2'}]),
+      JSON.stringify(['end', 1]),
+    ];
+  }
+
+});
+
 test('closes node', function(t) {
   node.close(t.end.bind(t));
 });
