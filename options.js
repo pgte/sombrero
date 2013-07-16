@@ -2,7 +2,8 @@ var extend = require('util')._extend;
 var assert = require('assert');
 
 var defaultOptions = {
-  base: process.cwd() + '/.sombrero'
+  base: process.cwd() + '/.sombrero',
+  isolated: false
 };
 
 module.exports =
