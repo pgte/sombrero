@@ -11,10 +11,11 @@ function createParser() {
   function parseJSON(d) {
     try {
       d = JSON.parse(d)
-      this.queue(d);
     } catch(err) {
       s.emit('error', err);
+      return;
     }
+    this.queue(d);
   }
 };
 

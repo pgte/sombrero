@@ -37,7 +37,6 @@ test('can get a write stream', function(t) {
   var closed = false;
 
   function onClose() {
-    console.log('closed');
     t.notOk(closed);
     closed = true;
     t.end();

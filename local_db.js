@@ -3,6 +3,8 @@ var inherits = require('util').inherits;
 
 var level = require('level');
 var mkdirp = require('mkdirp');
+var combine = require('stream-combiner');
+var through = require('through');
 
 var levelCreateOptions = {
   createIfMissing: true
@@ -69,7 +71,13 @@ LocalDB.prototype.createWriteStream = function createWriteStream(options) {
 /// createReadStream
 
 LocalDB.prototype.createReadStream = function createReadStream(options) {
-  return this.db.createReadStream(options);
+  var s = this.db.createReadStream(options);
+  if (options.values) {
+    s = combine(s, parseStream());
+  } else if (! options.keys) {
+    s = combine(s, parseValuesStream());
+  }
+  return s;
 };
 
 
@@ -83,7 +91,7 @@ LocalDB.prototype.createKeyStream = function createKeyStream(options) {
 /// createValueStream
 
 LocalDB.prototype.createValueStream = function createValueStream(options) {
-  return this.db.createValueStream(options);
+  var s = combine(this.db.createValueStream(options), parseStream());
 };
 
 /// close
@@ -102,4 +110,24 @@ LocalDB.prototype.close = function close(cb) {
 function onClosed() {
   this._closed = true;
   this.emit('closed');
+}
+
+
+/// parseStream
+
+function parseStream() {
+  return through(parseStream);
+
+  function parseStream(d) {
+    this.queue(JSON.parse(d));
+  }
+}
+
+function parseValuesStream() {
+  return through(parseValuesStream);
+
+  function parseValuesStream(d) {
+    d.value = JSON.parse(d.value);
+    this.queue(d);
+  }
 }

@@ -78,7 +78,7 @@ test('can get', function(t) {
 
 });
 
-test('can create read stream', function(t) {
+test('can create a read stream', function(t) {
   var streams = AttachedStream();
   var serverPeer = ServerPeer(streams.server, node, db);
 
@@ -98,10 +98,41 @@ test('can create read stream', function(t) {
 
   function done() {
     var expectedReplies = [
-      JSON.stringify(['read', 1, {key: prefix + 'A', value: 'v1'}]),
-      JSON.stringify(['read', 1, {key: prefix + 'B', value: 'v2'}]),
-      JSON.stringify(['end', 1]),
+      JSON.stringify(['data', 1, {key: prefix + 'A', value: 'v1'}]) + '\n',
+      JSON.stringify(['data', 1, {key: prefix + 'B', value: 'v2'}]) + '\n',
+      JSON.stringify(['end', 1]) + '\n',
     ];
+    t.deepEqual(replies, expectedReplies);
+    t.end();
+  }
+
+});
+
+test('can create a write stream', function(t) {
+  var streams = AttachedStream();
+  var serverPeer = ServerPeer(streams.server, node, db);
+
+  streams.client.write(JSON.stringify(['writeStream', 1]) + '\n');
+  streams.client.write(JSON.stringify(['write', 1, {key: prefix + 'C', value: 'v3'}]) + '\n');
+  streams.client.write(JSON.stringify(['write', 1, {key: prefix + 'D', value: 'v4'}]) + '\n');
+  streams.client.write(JSON.stringify(['end', 1]) + '\n');
+
+  var replies = [];
+  streams.client.on('data', function(d) {
+    replies.push(d);
+    t.ok(replies.length <= 3);
+    if (replies.length == 3) done()
+  });
+
+
+  function done() {
+    var expectedReplies = [
+      JSON.stringify(['ack', 1]) + '\n',
+      JSON.stringify(['ack', 1]) + '\n',
+      JSON.stringify(['close', 1]) + '\n',
+    ];
+    t.deepEqual(replies, expectedReplies);
+    t.end();
   }
 
 });
