@@ -205,7 +205,10 @@ And you can override it on a specific `put` command:
 var writeOptions = {
   w: 1
 };
-db.put('name', 'Sobrero', writeOptions);
+
+db.put('name', 'Sobrero', writeOptions, function(err) {
+  // ...
+});
 ```
 
 ## R - Read Quorum
@@ -219,9 +222,7 @@ var options = {
   r: 3
 };
 
-var db = node.db('mydatabase', options, function(err) {
-  // ...
-});
+var db = node.db('mydatabase', options);
 ```
 
 And you can override it on a specific `get` command:

@@ -25,6 +25,38 @@ test('the same node name gets the same object', function(t) {
   t.end();
 });
 
+test('can put and get', function(t) {
+  var name = 'Sombrero_' + Date.now();
+  db.put('name', name, onPut);
+
+  function onPut(err) {
+    if (err) throw err;
+    db.get('name', onGet);
+  }
+
+  function onGet(err, value) {
+    if (err) throw err;
+    t.equal(value, name);
+    t.end();
+  }
+});
+
+test('can put without callback', function(t) {
+  var name = 'Sombrero_' + Date.now();
+  db.put('name', name);
+
+  setTimeout(function() {
+    db.get('name', onGet);
+  }, 100);
+
+  function onGet(err, value) {
+    if (err) throw err;
+    t.equal(value, name);
+    t.end();
+  }
+
+});
+
 test('closes node', function(t) {
   // the followint 2 lines are here just to check
   // if db.close can be called twice
