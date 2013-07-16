@@ -38,6 +38,8 @@ function DB(node, name, options) {
 
   // Local
 
+  this.isLocal = node._options.isolated;
+
   if (options.local) this.makeLocal();
 }
 
@@ -69,7 +71,11 @@ DB.prototype.put = function put(key, value, options, cb) {
     var defOptions = extend({}, this._writeOptions);
     options = extend(defOptions, options);
     this.remotes.put(key, value, options, onRemotePut);
-  } else putLocal.call(this);
+  } else if (this.isLocal) {
+    putLocal.call(this);
+  } else {
+    error(new Error('Isolated and not local'));
+  }
 
   function onRemotePut(err) {
     if (err) {
@@ -83,10 +89,13 @@ DB.prototype.put = function put(key, value, options, cb) {
   }
 
   function onPutLocal(err) {
-    if (err) {
-      if (cb) cb(err);
-      else this.emit('error', err);
-    } else if (cb) cb();
+    if (err) error(err)
+    else if (cb) cb();
+  }
+
+  function error(err) {
+    if (cb) cb(err);
+    else this.emit('error', err);
   }
 
 };
@@ -105,21 +114,92 @@ DB.prototype.get = function get(key, options, cb) {
     var defOptions = extend({}, this._readOptions);
     options = extend(defOptions, options);
     this.remotes.get(key, options, onRemoteGet);
-  } else getLocal.call(this);
+  } else if (this.isLocal) {
+    getLocal.call(this);
+  } else {
+    error(new Error('Isolated and not local'));
+  }
 
-  function onRemoteGet(err) {
-    if (err) {
-      if (cb) cb(err);
-      else this.emit('error', err);
-    } else getLocal.call(this);
+  function onRemoteGet(err, value) {
+    if (err) error(err);
+    // PENDING: READ REPAIRS!!!!
+    else getLocal.call(this);
   }
 
   function getLocal() {
     this.local.get(key, cb);
   }
 
+  function error(err) {
+    if (cb) cb(err);
+    else this.emit('error', err);
+  }
+
 };
 
+
+/// createWriteStream
+
+DB.prototype.createWriteStream = function createWriteStream(options) {
+  if (! this.node._options.isolated) {
+    // PENDING
+  } else if (this.isLocal) {
+    return this.local.createWriteStream(options);
+  } else error(new Error('Isolated and not local'));
+
+  function error(err) {
+    if (cb) cb(err);
+    else this.emit('error', err);
+  }
+};
+
+
+/// createReadStream
+
+DB.prototype.createReadStream = function createReadStream(options) {
+  if (! this.node._options.isolated) {
+    // PENDING
+  } else if (this.isLocal) {
+    return this.local.createReadStream(options);
+  } else error(new Error('Isolated and not local'));
+
+  function error(err) {
+    if (cb) cb(err);
+    else this.emit('error', err);
+  }
+};
+
+
+/// createKeyStream
+
+DB.prototype.createKeyStream = function createKeyStream(options) {
+  if (! this.node._options.isolated) {
+    // PENDING
+  } else if (this.isLocal) {
+    return this.local.createKeyStream(options);
+  } else error(new Error('Isolated and not local'));
+
+  function error(err) {
+    if (cb) cb(err);
+    else this.emit('error', err);
+  }
+}
+
+
+/// createValueStream
+
+DB.prototype.createValueStream = function createValueStream(options) {
+  if (! this.node._options.isolated) {
+    // PENDING
+  } else if (this.isLocal) {
+    return this.local.createValueStream(options);
+  } else error(new Error('Isolated and not local'));
+
+  function error(err) {
+    if (cb) cb(err);
+    else this.emit('error', err);
+  }
+}
 
 /// close
 

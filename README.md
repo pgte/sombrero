@@ -68,6 +68,23 @@ You can get a reference to a database using:
 var db = node.db('mydatabase');
 ```
 
+You can also pass it some options:
+
+```javascript
+var options = {
+  w: 3,
+  r: 1
+};
+
+var db = node.db('mydatabase', options);
+```
+
+Valid options are:
+
+* `r`: read quorum (default is 2)
+* `w`: write quorum (default is 2)
+* `n`: replication factor (default is 3)
+
 If you get the same database repeatedly you get a reference to the same object:
 
 ```javascript
@@ -114,6 +131,120 @@ db.get('name', function(err, value) {
 ```
 
 ## Streams
+
+The same API of [levelup](https://npmjs.org/package/levelup#createReadStream).
+
+### createReadStream([options])
+
+```javascript
+var s = db.createReadStream();
+
+s.on('data', function(data) {
+  console.log('%j = %j', data.key, data.value);
+});
+
+s.on('error', function(err) {
+  console.error(err);
+});
+
+s.on('end', function() {
+  console.log('stream ended');
+});
+
+s.on('close', function() {
+  console.log('stream closed');
+});
+```
+
+Additionally, you can supply an options object as the first parameter to createReadStream() with the following options:
+
+* `start`: the key you wish to start the read at. By default it will start at the beginning of the store. Note that the start doesn't have to be an actual key that exists, LevelDB will simply find the next key, greater than the key you provide.
+* `end`: the key you wish to end the read on. By default it will continue until the end of the store. Again, the end doesn't have to be an actual key as an (inclusive) <=-type operation is performed to detect the end. You can also use the destroy() method instead of supplying an 'end' parameter to achieve the same effect.
+* `reverse` (boolean, default: false): a boolean, set to true if you want the stream to go in reverse order. Beware that due to the way LevelDB works, a reverse seek will be slower than a forward seek.
+* `keys` (boolean, default: true): whether the 'data' event should contain keys. If set to true and 'values' set to false then 'data' events will simply be keys, rather than objects with a 'key' property. Used internally by the createKeyStream() method.
+* `values` (boolean, default: true): whether the 'data' event should contain values. If set to true and 'keys' set to false then 'data' events will simply be values, rather than objects with a 'value' property. Used internally by the createValueStream() method.
+*  `limit` (number, default: -1): limit the number of results collected by this stream. This number represents a maximum number of results and may not be reached if you get to the end of the store or your 'end' value first. A value of -1 means there is no limit.
+
+
+### createKeyStream([options])
+
+A KeyStream is a ReadStream where the 'data' events are simply the keys from the database so it can be used like a traditional stream rather than an object stream.
+
+You can obtain a KeyStream either by calling the createKeyStream() method on a db object or by passing passing an options object to createReadStream() with keys set to true and values set to false.
+
+```javascript
+var s = db.createKeyStream();
+
+s.on('data', function(key) {
+  console.log('key=%j', key);
+});
+```
+
+### createValueStream([options])
+
+A ValueStream is a ReadStream where the 'data' events are simply the values from the database so it can be used like a traditional stream rather than an object stream.
+
+You can obtain a ValueStream either by calling the createValueStream() method on a db object or by passing passing an options object to createReadStream() with values set to true and keys set to false.
+
+```javascript
+var s = db.createValueStream()
+
+s.on('data', function (data) {
+  console.log('value=%j', data)
+});
+```
+
+### createWriteStream([options])
+
+A WriteStream can be obtained by calling the createWriteStream() method. The resulting stream is a complete Node.js-style Writable Stream which accepts objects with 'key' and 'value' pairs on its write() method.
+
+The WriteStream will buffer writes and submit them as a batch() operations where writes occur within the same tick.
+
+```javascript
+var s = db.createWriteStream();
+
+s.on('error', function(err) {
+  console.error(err);
+});
+
+s.on('close', function() {
+  console.log('stream closed');
+});
+
+s.write({key: 'name', value: 'Sombrero'});
+s.end();
+```
+
+#### delete
+
+If individual write() operations are performed with a 'type' property of 'del', they will be passed on as 'del' operations to the batch.
+
+```javascript
+s.write({ type: 'del', key: 'name' });
+```
+
+If the WriteStream is created a 'type' option of 'del', all write() operations will be interpreted as 'del', unless explicitly specified as 'put'.
+
+```javascript
+var s = db.createWriteStream({ type: 'del' })
+
+s.on('error', function (err) {
+  console.log('Oh my!', err)
+})
+s.on('close', function () {
+  console.log('Stream closed')
+})
+
+s.write({ key: 'name' })
+s.write({ key: 'dob' })
+// but it can be overridden
+s.write({ type: 'put', key: 'spouse', value: 'Ri Sol-ju' })
+s.write({ key: 'occupation' })
+s.end()
+```
+
+
+### Follow Stream
 
 PENDING
 

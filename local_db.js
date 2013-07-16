@@ -58,6 +58,34 @@ LocalDB.prototype.get = function get(key, cb) {
   }
 };
 
+
+/// createWriteStream
+
+LocalDB.prototype.createWriteStream = function createWriteStream(options) {
+  return this.db.createWriteStream(options);
+};
+
+
+/// createReadStream
+
+LocalDB.prototype.createReadStream = function createReadStream(options) {
+  return this.db.createReadStream(options);
+};
+
+
+/// createKeyStream
+
+LocalDB.prototype.createKeyStream = function createKeyStream(options) {
+  return this.db.createKeyStream(options);
+};
+
+
+/// createValueStream
+
+LocalDB.prototype.createValueStream = function createValueStream(options) {
+  return this.db.createValueStream(options);
+};
+
 /// close
 
 LocalDB.prototype.close = function close(cb) {
