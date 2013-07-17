@@ -58,22 +58,36 @@ test('client gets', function(t) {
 
 test('client can create a write stream', function(t) {
   var s = client.createWriteStream();
-  for (var i = 0 ; i < 1000; i ++) {
-    s.write({key: prefix + 'k' + i, value: 'v' + i}, onWrite);
+  for (var i = 0 ; i < 100; i ++) {
+    s.write({key: prefix + 'k' + i, value: 'v' + i}, onWrite1);
   }
-
-  setTimeout(function() {
-    for (var i = 1000 ; i < 2000; i ++) {
-      s.write({key: prefix + 'k' + i, value: 'v' + i}, onWrite);
-    }
-  });
 
   var wrote = 0;
-  function onWrite(err) {
+  function onWrite1(err) {
+    // console.log('wrote');
     if (err) throw err;
     wrote ++;
-    if (wrote == 2000) t.end();
+    if (wrote == 100) done1();
   }
+
+  function done1() {
+    setTimeout(function() {
+      for (var i = 100 ; i < 200; i ++) {
+        s.write({key: prefix + 'k' + i, value: 'v' + i}, onWrite2);
+      }
+      s.end();
+    }, 100);
+  }
+
+  function onWrite2(err) {
+    if (err) throw err;
+    wrote ++;
+  }
+
+  s.on('close', function() {
+    t.equal(wrote, 200);
+    t.end();
+  });
 
 });
 

@@ -111,11 +111,11 @@ Peer.prototype.createWriteStream = function createWriteStream(options) {
     objectMode: true,
     highWaterMark: this.options.writeHighWaterMark
   });
+  s._write = _write;
+  s.once('finish', onFinish);
 
   s.__callbacks = [];
   addStream.call(this, id, s);
-
-  s._write = _write;
 
   server.emit('writeStream', id, options);
 
@@ -125,6 +125,11 @@ Peer.prototype.createWriteStream = function createWriteStream(options) {
     s.__callbacks.push(cb);
     server.emit('write', id, d);
   }
+
+  function onFinish() {
+    server.emit('end', id);
+  }
+
 };
 
 
