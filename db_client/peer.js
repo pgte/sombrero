@@ -161,19 +161,20 @@ Peer.prototype.createKeyStream = function createKeyStream(options) {
   options.keys = true;
   options.values = false;
 
-  var server = this._server;
-  var id = uuid();
-  var s = new ReadStream({
-    objectMode: true
-  });
-  s._read = function() {};
-
-  addStream.call(this, id, s);
-
-  server.emit('read', id, options);
-
-  return s;
+  return this.createReadStream(options);
 };
+
+
+/// createValueStream
+
+Peer.prototype.createValueStream = function createValueStream(options) {
+  if (! options) options = {};
+  options.keys = false;
+  options.values = true;
+
+  return this.createReadStream(options);
+};
+
 
 /// onError
 

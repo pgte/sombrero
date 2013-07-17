@@ -136,6 +136,26 @@ test('can create a key stream', function(t) {
   });
 });
 
+test('can create a value stream', function(t) {
+  var s = client.createValueStream({
+    start: prefix,
+    end: prefix + 'v200'
+  });
+
+  var i = 0;
+  s.on('data', function(d) {
+    i ++;
+    var suffix = pad(i);
+    var expectedValue = 'v' + suffix;
+    t.deepEqual(d, expectedValue);
+  });
+
+  s.once('end', function() {
+    t.equal(i, 200);
+    t.end();
+  });
+});
+
 test('closes node, client and server', function(t) {
   client.destroy();
   server.close();
