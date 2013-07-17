@@ -95,9 +95,7 @@ function onWrite(requestId, what) {
 
     // PENDING: should only send ack
     // when write is acknowledged
-    process.nextTick(function() {
-      this._emitter.emit('ack', requestId);
-    }.bind(this));
+    process.nextTick(onReady.bind(this));
 
     //stream.once('drain', onDrain.bind(this));
   }
@@ -105,6 +103,9 @@ function onWrite(requestId, what) {
   // function onDrain() {
   //   this._emitter.emit('ack', requestId);
   // }
+  function onReady() {
+    this._emitter.emit('ack', requestId);
+  }
 }
 
 

@@ -114,8 +114,11 @@ test('can create a write stream', function(t) {
 
   streams.client.write(JSON.stringify(['writeStream', 1]) + '\n');
   streams.client.write(JSON.stringify(['write', 1, {key: prefix + 'C', value: 'v3'}]) + '\n');
-  streams.client.write(JSON.stringify(['write', 1, {key: prefix + 'D', value: 'v4'}]) + '\n');
-  streams.client.write(JSON.stringify(['end', 1]) + '\n');
+
+  setTimeout(function() {
+    streams.client.write(JSON.stringify(['write', 1, {key: prefix + 'D', value: 'v4'}]) + '\n');
+    streams.client.write(JSON.stringify(['end', 1]) + '\n');
+  }, 100);
 
   var replies = [];
   streams.client.on('data', function(d) {
