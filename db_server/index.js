@@ -7,15 +7,18 @@ var Peer = require('./peer');
 module.exports =
 function createDBServer(db) {
   return new DBServer(db);
-  this.db = db;
-  this.peers = [];
 };
 
 function DBServer(db) {
   EventEmitter.call(this);
+  this.db = db;
+  this.peers = [];
 };
 
 inherits(DBServer, EventEmitter);
+
+
+/// listen
 
 DBServer.prototype.listen = function listen(port, host, cb) {
   if (typeof host != 'string') {
@@ -26,6 +29,13 @@ DBServer.prototype.listen = function listen(port, host, cb) {
   server.listen(port, host, cb);
 };
 
+
+/// close
+
+DBServer.prototype.close = function close(cb) {
+  var server = this._getServer();
+  server.close(cb);
+};
 
 /// _getServer
 
@@ -50,7 +60,7 @@ function onError(err) {
 function onConnection(socket) {
   var peer = Peer(socket, this.db);
   this.peers.push(peer);
-  socket.once('close', onConnectionClose);
+  socket.once('close', onConnectionClose.bind(this));
 
   function onConnectionClose() {
     var idx = this.peers.indexOf(peer);
