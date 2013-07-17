@@ -3,7 +3,6 @@ var inherits = require('util').inherits;
 var EventEmitter = require('events').EventEmitter;
 
 var LocalDB = require('./local_db');
-var DBServer = require('./db_server');
 
 var defaultOptions = {
   w: 2,
@@ -43,9 +42,6 @@ function DB(node, name, options) {
 
   if (options.local) this.makeLocal();
 
-  // Server
-
-  this.server = DBServer(node, this);
 }
 
 inherits(DB, EventEmitter);

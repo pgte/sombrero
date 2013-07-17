@@ -29,7 +29,9 @@
     "split": "~0.2.6",
     "through": "~2.3.4",
     "duplex-emitter": "~2.0.0",
-    "node-uuid": "~1.4.0"
+    "node-uuid": "~1.4.0",
+    "level-net-client": "0.0.1",
+    "level-net-server": "0.0.1"
   },
   "devDependencies": {
     "tap": "*",

@@ -6,6 +6,11 @@ var node;
 var db;
 
 test('starts local db', function(t) {
+
+  try {
+    require('fs').unlinkSync(__dirname + '/.sombrero');
+  } catch(_) {}
+
   node = Sombrero.Node({
     cluster: 'mycluster',
     isolated: true
