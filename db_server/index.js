@@ -1,3 +1,4 @@
+var assert = require('assert');
 var EventEmitter = require('events').EventEmitter;
 var inherits = require('util').inherits;
 var net = require('net');
@@ -10,6 +11,7 @@ function createDBServer(db) {
 };
 
 function DBServer(db) {
+  assert(db, 'need a db');
   EventEmitter.call(this);
   this.db = db;
   this.peers = [];

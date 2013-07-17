@@ -28,13 +28,32 @@ test('starts local db', function(t) {
 
 test('starts a server', function(t) {
   port = Math.floor(Math.random() * (65535 - 49152) + 49152);
-  server = Server();
+  server = Server(db);
   server.listen(port, t.end.bind(t));
 });
 
 test('client connects', function(t) {
   client = Client();
   client.connect(port, t.end.bind(t));
+});
+
+test('client puts', function(t) {
+  client.put(prefix + 'k1', 'v1', onPut);
+
+  function onPut(err) {
+    if (err) throw err;
+    t.end();
+  }
+});
+
+test('client gets', function(t) {
+  client.get(prefix + 'k1', onGet);
+
+  function onGet(err, value) {
+    if (err) throw err;
+    t.deepEqual(value, 'v1');
+    t.end();
+  }
 });
 
 
