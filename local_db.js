@@ -92,7 +92,7 @@ LocalDB.prototype.createKeyStream = function createKeyStream(options) {
 /// createValueStream
 
 LocalDB.prototype.createValueStream = function createValueStream(options) {
-  var s = combine(this.db.createValueStream(options), createParseStream());
+  return combine(this.db.createValueStream(options), createParseStream());
 };
 
 /// close
