@@ -64,7 +64,8 @@ LocalDB.prototype.get = function get(key, cb) {
 /// createWriteStream
 
 LocalDB.prototype.createWriteStream = function createWriteStream(options) {
-  return this.db.createWriteStream(options);
+  var s = this.db.createWriteStream(options);
+  return combine(createEncodeValueStream(), s);
 };
 
 
@@ -72,10 +73,10 @@ LocalDB.prototype.createWriteStream = function createWriteStream(options) {
 
 LocalDB.prototype.createReadStream = function createReadStream(options) {
   var s = this.db.createReadStream(options);
-  if (options.values) {
-    s = combine(s, parseStream());
-  } else if (! options.keys) {
-    s = combine(s, parseValuesStream());
+  if (options && options.values) {
+    s = combine(s, createParseStream());
+  } else if (! options || ! options.keys) {
+    s = combine(s, createValuesParseStream());
   }
   return s;
 };
@@ -91,7 +92,7 @@ LocalDB.prototype.createKeyStream = function createKeyStream(options) {
 /// createValueStream
 
 LocalDB.prototype.createValueStream = function createValueStream(options) {
-  var s = combine(this.db.createValueStream(options), parseStream());
+  var s = combine(this.db.createValueStream(options), createParseStream());
 };
 
 /// close
@@ -113,21 +114,34 @@ function onClosed() {
 }
 
 
-/// parseStream
+/// encodeValueStream
 
-function parseStream() {
-  return through(parseStream);
+function createEncodeValueStream() {
+  return through(encodeValueStream);
+}
 
-  function parseStream(d) {
-    this.queue(JSON.parse(d));
+function encodeValueStream(d) {
+  if (d) {
+    if (d.value) d.value = JSON.stringify(d.value);
+    this.queue(d);
   }
 }
 
-function parseValuesStream() {
-  return through(parseValuesStream);
+/// parseStream
 
-  function parseValuesStream(d) {
-    d.value = JSON.parse(d.value);
-    this.queue(d);
-  }
+function createParseStream() {
+  return through(parseStream);
+}
+
+function parseStream(d) {
+  this.queue(JSON.parse(d));
+}
+
+function createValuesParseStream() {
+  return through(parseValuesStream);
+}
+
+function parseValuesStream(d) {
+  d.value = JSON.parse(d.value);
+  this.queue(d);
 }

@@ -58,6 +58,14 @@ Client.prototype.createWriteStream = function createWriteStream(options) {
 };
 
 
+/// createReadStream
+
+Client.prototype.createReadStream = function createReadStream(options) {
+  assert(this._peer, 'Not connected');
+  return this._peer.createReadStream(options);
+};
+
+
 /// destroy
 
 Client.prototype.destroy = function destroy() {

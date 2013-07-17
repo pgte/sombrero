@@ -6,6 +6,7 @@ var uuid = require('node-uuid').v4;
 var slice = Array.prototype.slice;
 
 var WriteStream = require('stream').Writable;
+var ReadStream = require('stream').Readable;
 
 var defaultOptions = {
   timeout: 5000,
@@ -34,6 +35,8 @@ function Peer(stream, options) {
   this._server.on('got', onGot.bind(this));
   this._server.on('ack', onAck.bind(this));
   this._server.on('close', onClose.bind(this));
+  this._server.on('data', onData.bind(this));
+  this._server.on('end', onEnd.bind(this));
 };
 
 inherits(Peer, EventEmitter);
@@ -133,6 +136,23 @@ Peer.prototype.createWriteStream = function createWriteStream(options) {
 };
 
 
+/// createReadStream
+
+Peer.prototype.createReadStream = function createReadStream(options) {
+  var server = this._server;
+  var id = uuid();
+  var s = new ReadStream({
+    objectMode: true
+  });
+  s._read = function() {};
+
+  addStream.call(this, id, s);
+
+  server.emit('read', id, options);
+
+  return s;
+};
+
 /// onError
 
 function onError(reqId, message, stack) {
@@ -175,3 +195,22 @@ function onClose(reqId) {
   }
 }
 
+
+/// onData
+
+function onData(reqId, data) {
+  var s = this._streams[reqId];
+  if (s) {
+    s.push(data);
+  }
+}
+
+
+/// onEnd
+
+function onEnd(reqId) {
+  var s = this._streams[reqId];
+  if (s) {
+    s.push(); // signal stream end
+  }
+}

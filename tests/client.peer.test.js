@@ -24,6 +24,7 @@ test('starts local db', function(t) {
   });
 
   prefix = Date.now().toString() + ':';
+  console.log('prefix:', prefix);
 });
 
 test('starts a server', function(t) {
@@ -38,7 +39,7 @@ test('client connects', function(t) {
 });
 
 test('client puts', function(t) {
-  client.put(prefix + 'k1', 'v1', onPut);
+  client.put(prefix + 'k001', 'v001', onPut);
 
   function onPut(err) {
     if (err) throw err;
@@ -47,19 +48,21 @@ test('client puts', function(t) {
 });
 
 test('client gets', function(t) {
-  client.get(prefix + 'k1', onGet);
+  client.get(prefix + 'k001', onGet);
 
   function onGet(err, value) {
     if (err) throw err;
-    t.deepEqual(value, 'v1');
+    t.deepEqual(value, 'v001');
     t.end();
   }
 });
 
 test('client can create a write stream', function(t) {
   var s = client.createWriteStream();
-  for (var i = 0 ; i < 100; i ++) {
-    s.write({key: prefix + 'k' + i, value: 'v' + i}, onWrite1);
+  for (var i = 1 ; i <= 100; i ++) {
+    var suffix = pad(i);
+    s.write({key: prefix + 'k' + suffix, value: 'v' + suffix}, onWrite1);
+    console.log('wrote', suffix)
   }
 
   var wrote = 0;
@@ -72,8 +75,10 @@ test('client can create a write stream', function(t) {
 
   function done1() {
     setTimeout(function() {
-      for (var i = 100 ; i < 200; i ++) {
-        s.write({key: prefix + 'k' + i, value: 'v' + i}, onWrite2);
+      for (var i = 101 ; i <= 200; i ++) {
+        var suffix = pad(i);
+        s.write({key: prefix + 'k' + suffix, value: 'v' + suffix}, onWrite2);
+        console.log('wrote', suffix)
       }
       s.end();
     }, 100);
@@ -91,6 +96,31 @@ test('client can create a write stream', function(t) {
 
 });
 
+test('client can create a read stream', function(t) {
+  var s = client.createReadStream({
+    start: prefix,
+    end: prefix + 'v200'
+  });
+
+  var i = 0;
+  s.on('data', function(d) {
+    i ++;
+    var suffix = pad(i);
+    var expectedKey = prefix + 'k' + suffix;
+    t.deepEqual(d.key, expectedKey);
+
+    var expectedValue = 'v' + suffix;
+    t.deepEqual(d.value, expectedValue);
+  });
+
+  s.once('end', function() {
+    console.log('ended');
+    t.equal(i, 200);
+    t.end();
+  });
+
+});
+
 test('closes node, client and server', function(t) {
   client.destroy();
   server.close();
@@ -98,3 +128,11 @@ test('closes node, client and server', function(t) {
 });
 
 function xtest() {}
+
+function pad(n) {
+  var s = n.toString();
+  if (n < 10) s = '0' + s;
+  if (n < 100) s = '0' + s;
+  //console.log('padded %d is %s', n, s);
+  return s;
+}
