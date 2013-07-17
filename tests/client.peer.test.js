@@ -24,7 +24,6 @@ test('starts local db', function(t) {
   });
 
   prefix = Date.now().toString() + ':';
-  console.log('prefix:', prefix);
 });
 
 test('starts a server', function(t) {
@@ -62,12 +61,10 @@ test('client can create a write stream', function(t) {
   for (var i = 1 ; i <= 100; i ++) {
     var suffix = pad(i);
     s.write({key: prefix + 'k' + suffix, value: 'v' + suffix}, onWrite1);
-    console.log('wrote', suffix)
   }
 
   var wrote = 0;
   function onWrite1(err) {
-    // console.log('wrote');
     if (err) throw err;
     wrote ++;
     if (wrote == 100) done1();
@@ -78,7 +75,6 @@ test('client can create a write stream', function(t) {
       for (var i = 101 ; i <= 200; i ++) {
         var suffix = pad(i);
         s.write({key: prefix + 'k' + suffix, value: 'v' + suffix}, onWrite2);
-        console.log('wrote', suffix)
       }
       s.end();
     }, 100);
@@ -114,11 +110,30 @@ test('client can create a read stream', function(t) {
   });
 
   s.once('end', function() {
-    console.log('ended');
     t.equal(i, 200);
     t.end();
   });
 
+});
+
+test('can create a key stream', function(t) {
+  var s = client.createKeyStream({
+    start: prefix,
+    end: prefix + 'v200'
+  });
+
+  var i = 0;
+  s.on('data', function(d) {
+    i ++;
+    var suffix = pad(i);
+    var expectedKey = prefix + 'k' + suffix;
+    t.deepEqual(d, expectedKey);
+  });
+
+  s.once('end', function() {
+    t.equal(i, 200);
+    t.end();
+  });
 });
 
 test('closes node, client and server', function(t) {
@@ -133,6 +148,5 @@ function pad(n) {
   var s = n.toString();
   if (n < 10) s = '0' + s;
   if (n < 100) s = '0' + s;
-  //console.log('padded %d is %s', n, s);
   return s;
 }

@@ -153,6 +153,28 @@ Peer.prototype.createReadStream = function createReadStream(options) {
   return s;
 };
 
+
+/// createKeyStream
+
+Peer.prototype.createKeyStream = function createKeyStream(options) {
+  if (! options) options = {};
+  options.keys = true;
+  options.values = false;
+
+  var server = this._server;
+  var id = uuid();
+  var s = new ReadStream({
+    objectMode: true
+  });
+  s._read = function() {};
+
+  addStream.call(this, id, s);
+
+  server.emit('read', id, options);
+
+  return s;
+};
+
 /// onError
 
 function onError(reqId, message, stack) {

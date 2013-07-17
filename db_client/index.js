@@ -65,6 +65,12 @@ Client.prototype.createReadStream = function createReadStream(options) {
   return this._peer.createReadStream(options);
 };
 
+/// createKeyStream
+
+Client.prototype.createKeyStream = function createKeyStream(options) {
+  assert(this._peer, 'Not connected');
+  return this._peer.createKeyStream(options);
+};
 
 /// destroy
 
