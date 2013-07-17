@@ -56,6 +56,26 @@ test('client gets', function(t) {
   }
 });
 
+test('client can create a write stream', function(t) {
+  var s = client.createWriteStream();
+  for (var i = 0 ; i < 1000; i ++) {
+    s.write({key: prefix + 'k' + i, value: 'v' + i}, onWrite);
+  }
+
+  setTimeout(function() {
+    for (var i = 1000 ; i < 2000; i ++) {
+      s.write({key: prefix + 'k' + i, value: 'v' + i}, onWrite);
+    }
+  });
+
+  var wrote = 0;
+  function onWrite(err) {
+    if (err) throw err;
+    wrote ++;
+    if (wrote == 2000) t.end();
+  }
+
+});
 
 test('closes node, client and server', function(t) {
   client.destroy();

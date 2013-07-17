@@ -25,8 +25,10 @@ Client.prototype.connect = function connect(port, host, cb) {
     host = undefined;
   }
 
-  this._socket = net.connect(port, host, cb);
-  this._socket.once('connect', onConnect.bind(this));
+  var socket = net.connect(port, host, cb);
+  socket.setNoDelay(true);
+  socket.once('connect', onConnect.bind(this));
+  this._socket = socket;
 
   this._peer = Peer(this._socket);
 };
@@ -45,6 +47,14 @@ Client.prototype.put = function put(key, value, cb) {
 Client.prototype.get = function get(key, cb) {
   assert(this._peer, 'Not connected');
   this._peer.get(key, cb);
+};
+
+
+/// createWriteStream
+
+Client.prototype.createWriteStream = function createWriteStream(options) {
+  assert(this._peer, 'Not connected');
+  return this._peer.createWriteStream(options);
 };
 
 

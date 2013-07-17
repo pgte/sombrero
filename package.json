@@ -33,6 +33,6 @@
   },
   "devDependencies": {
     "tap": "*",
-    "duplexer": "*"
+    "duplexer": "~0.1.1"
   }
 }

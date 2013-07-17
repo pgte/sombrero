@@ -5,8 +5,11 @@ var duplexEmitter = require('duplex-emitter');
 var uuid = require('node-uuid').v4;
 var slice = Array.prototype.slice;
 
+var WriteStream = require('stream').Writable;
+
 var defaultOptions = {
-  timeout: 5000
+  timeout: 5000,
+  writeHighWaterMark: 50
 };
 
 module.exports =
@@ -24,10 +27,13 @@ function Peer(stream, options) {
   this._server = duplexEmitter(stream);
   this._requests = {};
   this._timeouts = {};
+  this._streams = {};
 
   this._server.on('error', onError.bind(this));
   this._server.on('ok', onOk.bind(this));
   this._server.on('got', onGot.bind(this));
+  this._server.on('ack', onAck.bind(this));
+  this._server.on('close', onClose.bind(this));
 };
 
 inherits(Peer, EventEmitter);
@@ -63,6 +69,12 @@ function endRequest(id, err) {
 }
 
 
+/// addStream
+function addStream(id, s) {
+  this._streams[id] = s;
+}
+
+
 /// requestTimeout
 
 function requestTimeout(id) {
@@ -89,6 +101,33 @@ Peer.prototype.get = function get(key, cb) {
 };
 
 
+/// createWriteStream
+
+Peer.prototype.createWriteStream = function createWriteStream(options) {
+  var server = this._server;
+  var id = uuid();
+
+  var s = new WriteStream({
+    objectMode: true,
+    highWaterMark: this.options.writeHighWaterMark
+  });
+
+  s.__callbacks = [];
+  addStream.call(this, id, s);
+
+  s._write = _write;
+
+  server.emit('writeStream', id, options);
+
+  return s;
+
+  function _write(d, _, cb) {
+    s.__callbacks.push(cb);
+    server.emit('write', id, d);
+  }
+};
+
+
 /// onError
 
 function onError(reqId, message, stack) {
@@ -110,3 +149,24 @@ function onOk(reqId) {
 function onGot(reqId, value) {
   endRequest.call(this, reqId, null, value);
 }
+
+
+/// onAck
+
+function onAck(reqId) {
+  var s = this._streams[reqId];
+  var cb = s.__callbacks.splice(0, 1)[0];
+  cb();
+}
+
+
+/// onClose
+
+function onClose(reqId) {
+  var s = this._streams[reqId];
+  if (s) {
+    delete this._streams[reqId];
+    s.emit('close');
+  }
+}
+
