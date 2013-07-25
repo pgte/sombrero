@@ -12,6 +12,7 @@ function Cluster(node, options) {
   this.name = options.cluster;
   this.cycle = new LightCycle({ seed: 0xcafebabe, size: 3 });
   this.meta = node.meta;
+  this.nodes = [];
 }
 
 Cluster.prototype.init = function() {
@@ -21,18 +22,10 @@ Cluster.prototype.init = function() {
   nodes.on('add', handleNewNode.bind(this));
   nodes.on('changes', handleChangedNode.bind(this));
   nodes.on('remove', handleRemovedNode.bind(this));
-
 }
 
 Cluster.prototype.join = function join() {
-  var node = {
-    id:     this.node.id,
-    host:   this.node.host,
-    gossip: this.node.gossip.port,
-    broker: this.node.broker.port,
-    type: 'node'
-  };
-  console.log('node is joining cluster %s %j', this.name, node);
+  var node = this.node.advertising();
   this.node.gossip.doc.add(node);
 };
 
@@ -44,12 +37,8 @@ Cluster.prototype.locate = function locate(dbName) {
 // Node set change listeners coming from gossip
 
 function handleNewNode(node) {
-  if (node.id != this.node.id) {
-    console.log('new node joined', node.state);
-  }
-
-  var remoteNode = RemoteNode(node);
-
+  var remoteNode = RemoteNode(node.state);
+  this.nodes.push(remoteNode);
   this.cycle.add(remoteNode, node.id);
 }
 
@@ -58,6 +47,17 @@ function handleChangedNode(node, changed) {
 }
 
 function handleRemovedNode(node) {
-  console.log('node leaving', node.id);
+  var idx = findNode.call(this, node);
+  var node = this.nodes[idx];
+  node.end();
   this.cycle.remove(node.id);
+  if (idx >= 0) this.nodes.splice(idx, 1);
+}
+
+function findNode(_node) {
+  for (var i = 0, node ; i < this.nodes.length; i ++) {
+    node = nodes[i];
+    if (node.id == _node.id) return i;
+  }
+  return -1;
 }

@@ -19,15 +19,13 @@ exports.getGossip = getGossip;
 function getGossip(port, cb) {
   var socket = net.connect(port);
   var doc = crdt.Doc();
+  var docStream = doc.createStream({tail: false});
+  docStream.once('sync', onSync);
+  socket.pipe(docStream).pipe(socket);
 
-  socket.once('connect', onConnect);
-  socket.pipe(doc.createStream()).pipe(socket);
-
-  function onConnect() {
-    setTimeout(function() {
-      socket.end();
-      cb(doc);
-    }, 1000);
+  function onSync() {
+    docStream.end();
+    cb(doc);
   }
 }
 
@@ -38,15 +36,13 @@ exports.syncGossip = syncGossip;
 
 function syncGossip(port, doc, cb) {
   var socket = net.connect(port);
+  var docStream = doc.createStream({tail: false});
+  docStream.once('sync', onSync)
+  socket.pipe(docStream).pipe(socket);
 
-  socket.once('connect', onConnect);
-  socket.pipe(doc.createStream()).pipe(socket);
-
-  function onConnect() {
-    setTimeout(function() {
-      socket.end();
-      cb(doc);
-    }, 1000);
+  function onSync() {
+    docStream.end();
+    cb(doc);
   }
 
 }

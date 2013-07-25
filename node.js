@@ -71,9 +71,10 @@ function onInitialized(err) {
   function onDone(err) {
     if (err) return node.emit('err', err);
     if (node._ending) return;
-    node.emit('initialized');
+    node.gossip.startDisseminator();
     node.cluster.init();
     node.cluster.join();
+    node.emit('initialized');
   }
 }
 
@@ -138,11 +139,26 @@ function saveMeta(cb) {
 }
 
 
+/// Advertising
+
+Node.prototype.advertising = function() {
+  return {
+    id:     this.id,
+    host:   this.host,
+    gossip: this.gossip.port,
+    broker: this.broker.port,
+    type: 'node'
+  };
+};
+
+
 /// close
 
 Node.prototype.close = function close(cb) {
   var node = this;
   node._ending = true;
+
+  node.gossip.stopDisseminator();
 
   var stoppers = [
     node.gossip.stopServer.bind(node.gossip),

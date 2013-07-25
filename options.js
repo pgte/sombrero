@@ -5,7 +5,9 @@ var defaultOptions = {
   base: process.cwd() + '/.sombrero',
   isolated: false,
   gossip: 9271,
-  broker: 9272
+  broker: 9272,
+  gossip_disseminate_interval: 1000,
+  gossip_timeout: 10000
 };
 
 module.exports =
