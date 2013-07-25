@@ -33,10 +33,13 @@
     "level-net-client": "0.0.1",
     "level-net-server": "0.0.1",
     "light-cycle": "0.0.6",
-    "crdt": "~3.5.2"
+    "crdt": "~3.5.2",
+    "level-scuttlebutt": "~5.0.6",
+    "ip": "~0.1.0"
   },
   "devDependencies": {
     "tap": "*",
-    "duplexer": "~0.1.1"
+    "duplexer": "~0.1.1",
+    "rimraf": "*~2.2.2"
   }
 }

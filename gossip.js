@@ -1,7 +1,9 @@
+var assert = require('assert');
 var EventEmitter = require('events').EventEmitter;
 var inherits = require('util').inherits;
 var net = require('net');
 var crdt = require('crdt');
+var levelScuttlebutt = require('level-scuttlebutt');
 
 module.exports = createGossip;
 
@@ -17,11 +19,32 @@ function Gossip(node, options) {
 
   this._listening = false;
 
-  this.doc = crdt.Doc();
+  this.db = node.meta.sublevel('gossip');
+  levelScuttlebutt(this.db, node.id, getGossipDoc.bind(this));
+
+  var gossip = this;
 }
 
 inherits(Gossip, EventEmitter);
 
+
+function getGossipDoc(docName) {
+  assert.equal(docName, 'gossip');
+  return new crdt.Doc();
+}
+
+
+/// Load
+
+Gossip.prototype.load = function load(cb) {
+  var self = this;
+
+  this.db.open('gossip', function(err, doc) {
+    if (err) return self.emit('error', err);
+    self.doc = doc;
+    cb();
+  });
+};
 
 /// Start and Stop Server
 

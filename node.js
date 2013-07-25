@@ -3,6 +3,7 @@ var inherits = require('util').inherits;
 
 var async = require('async');
 var uuid  = require('node-uuid').v4;
+var ip    = require('ip');
 
 var Cluster = require('./cluster');
 var DB      = require('./db');
@@ -21,6 +22,8 @@ function Node(options) {
 
   this.id = options.id || uuid();
 
+  this.host = ip.address();
+
   this._dbs = {};
   this._options = options;
 
@@ -37,6 +40,7 @@ function Node(options) {
 }
 
 inherits(Node, EventEmitter);
+
 
 /// Initialization
 
@@ -62,7 +66,7 @@ function onInitialized(err) {
   if (node._ending) return;
 
   async.series([
-      node.cluster.loadMeta.bind(node.cluster),
+      node.gossip.load.bind(node.gossip),
       node.gossip.startServer.bind(node.gossip),
       node.broker.startServer.bind(node.broker)
     ], onDone);
@@ -70,6 +74,8 @@ function onInitialized(err) {
   function onDone(err) {
     if (err) return node.emit('err', err);
     if (node._ending) return;
+    node.emit('initialized');
+    node.cluster.init();
     node.cluster.join();
   }
 }
@@ -159,10 +165,10 @@ Node.prototype.close = function close(cb) {
   var node = this;
   node._ending = true;
 
-  var stoppers = [];
-  if (node.gossip) stoppers.push(node.gossip.stopServer.bind(node.gossip));
-  if (node.broker) stoppers.push(node.broker.stopServer.bind(node.broker));
-
+  var stoppers = [
+    node.gossip.stopServer.bind(node.gossip),
+    node.broker.stopServer.bind(node.broker)
+  ];
   async.series(stoppers, onAllStopped);
 
   function onAllStopped() {
