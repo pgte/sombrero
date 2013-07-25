@@ -12,6 +12,7 @@ function Broker(node, options) {
   EventEmitter.call(this);
 
   this.node = node;
+  this.port = options.broker;
   this._options = options;
 }
 

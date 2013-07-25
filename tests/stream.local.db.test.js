@@ -14,7 +14,7 @@ test('starts local db', function(t) {
     isolated: true
   });
 
-  db = node.db('db1', { local: true });
+  db = node.dbs.db('db1', { local: true });
 
   db.once('ready', function() {
     t.end();

@@ -5,8 +5,8 @@ var async = require('async');
 var uuid  = require('node-uuid').v4;
 var ip    = require('ip');
 
+var DBs     = require('./dbs');
 var Cluster = require('./cluster');
-var DB      = require('./db');
 var Meta    = require('./meta');
 var Gossip  = require('./gossip');
 var Broker  = require('./broker');
@@ -21,15 +21,12 @@ function Node(options) {
   EventEmitter.call(this);
 
   this.id = options.id || uuid();
-
   this.host = ip.address();
-
-  this._dbs = {};
   this._options = options;
-
   this._ending = false;
 
-  this.meta    = Meta(options);
+  this.dbs       = DBs(this, options);
+  this.meta      = Meta(this, options);
   this.localMeta = this.meta.sublevel('local');
 
   this.gossip  = Gossip (this, this._options);
@@ -141,24 +138,6 @@ function saveMeta(cb) {
 }
 
 
-/// Databases
-
-Node.prototype.db = function db(name, options) {
-  var db = this._dbs[name];
-  if (! db) {
-    db = this._dbs[name] = DB(this, name, options);
-    db.once('closed', onDbClosed.bind(this, name));
-  }
-
-  return db;
-
-};
-
-function onDbClosed(name) {
-  delete this._dbs[name];
-}
-
-
 /// close
 
 Node.prototype.close = function close(cb) {
@@ -172,16 +151,6 @@ Node.prototype.close = function close(cb) {
   async.series(stoppers, onAllStopped);
 
   function onAllStopped() {
-    async.each(Object.keys(node._dbs), close.bind(node), onAllDBsClosed);
-
-    function close(dbName, cb) {
-      var db = node._dbs[dbName];
-      if (db) db.close(cb);
-      else if (cb) process.nextTick(cb);
-    }
-  }
-
-  function onAllDBsClosed() {
-    if (cb) cb();
+    node.dbs.close(cb);
   }
 };

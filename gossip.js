@@ -15,6 +15,7 @@ function Gossip(node, options) {
   EventEmitter.call(this);
 
   this.node = node;
+  this.port = options.gossip;
   this._options = options;
 
   this._listening = false;
