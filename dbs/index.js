@@ -28,7 +28,7 @@ DBs.prototype.db = function db(name, options) {
 DBs.prototype.local = function local(name, options) {
   var db = this._localDBs[name];
   if (! db) {
-    db = this._localDBs[name] = LocalDB(this.node, name, options);
+    db = this._localDBs[name] = LocalDB(name, options);
     db.once('closed', onLocalDbClosed.bind(this, name));
   }
 
