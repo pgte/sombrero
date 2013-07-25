@@ -40,7 +40,7 @@ function DB(node, name, options) {
 
   this.isLocal = node._options.isolated;
 
-  if (options.local) this.makeLocal();
+  if (this.isLocal) this.makeLocal();
 
 }
 
@@ -49,7 +49,7 @@ inherits(DB, EventEmitter);
 /// makeLocal
 
 DB.prototype.makeLocal = function makeLocal() {
-  this.local = LocalDB(this.node, this.name, this._options);
+  this.local = LocalDB(this.name, this._options);
   this.local.once('ready', onReady.bind(this));
   this.local.once('closed', onClosed.bind(this));
 

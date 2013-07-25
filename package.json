@@ -31,7 +31,9 @@
     "duplex-emitter": "~2.0.0",
     "node-uuid": "~1.4.0",
     "level-net-client": "0.0.1",
-    "level-net-server": "0.0.1"
+    "level-net-server": "0.0.1",
+    "light-cycle": "0.0.6",
+    "crdt": "~3.5.2"
   },
   "devDependencies": {
     "tap": "*",

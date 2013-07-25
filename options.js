@@ -3,7 +3,9 @@ var assert = require('assert');
 
 var defaultOptions = {
   base: process.cwd() + '/.sombrero',
-  isolated: false
+  isolated: false,
+  gossip: 9271,
+  broker: 9272
 };
 
 module.exports =
@@ -14,7 +16,7 @@ function Options(options) {
   defOptions = extend({}, defaultOptions);
   options = extend(defOptions, options);
 
-  assert(options.cluster, 'No cluster name defined');
+  if (! options.cluster) throw new Error('need cluster option');
 
   return options;
 }
