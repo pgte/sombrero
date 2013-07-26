@@ -1,17 +1,22 @@
 var net = require('net');
+var DBs = require('./remote_dbs');
 
 module.exports = createRemoteNode;
 
-function createRemoteNode(options) {
-  return new RemoteNode(options);
+function createRemoteNode(node, options) {
+  return new RemoteNode(node, options);
 }
 
-function RemoteNode(options) {
+function RemoteNode(node, options) {
   this.id = options.id;
+  this.node = node;
   this.gossipPort = options.gossip;
+  this.brokerPort = options.broker;
   this.host = options.host;
   this._options = options;
   this._ended = false;
+
+  this.dbs = DBs(this);
 }
 
 RemoteNode.prototype.gossip = function gossip() {
@@ -32,3 +37,4 @@ RemoteNode.prototype.advertising = function() {
     type: 'node'
   };
 };
+

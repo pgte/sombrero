@@ -73,7 +73,9 @@ function onInitialized(err) {
     if (node._ending) return;
     node.gossip.startDisseminator();
     node.cluster.init();
-    node.cluster.join();
+
+    if (node._options.join_cluster) node.cluster.join();
+
     node.emit('initialized');
   }
 }
@@ -157,11 +159,10 @@ Node.prototype.advertising = function() {
 Node.prototype.db = function db(name) {
   var node = this.cluster.locate(name);
   var db;
-  if (node == this)
+  if (! node || node == this)
     db = this.dbs.local(name);
-  else {
-    db = this.dbs.remote(name, node.host, node.broker);
-  }
+  else
+    db = node.dbs.remote(name);
 
   return db;
 };

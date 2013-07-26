@@ -26,11 +26,12 @@ Cluster.prototype.init = function() {
 
 Cluster.prototype.join = function join() {
   var node = this.node.advertising();
-  this.node.gossip.doc.add(node);
+  this.node.gossip.meet(node);
 };
 
 Cluster.prototype.locate = function locate(dbName) {
-  return this.cycle.locate(dbName);
+  var node = this.cycle.locate(dbName);
+  return node;
 };
 
 
@@ -38,8 +39,10 @@ Cluster.prototype.locate = function locate(dbName) {
 
 function handleNewNode(node) {
   if (node.id == this.node.id) node = this.node;
-  else node = RemoteNode(node.state);
-  this.nodes.push(node);
+  else {
+    node = RemoteNode(this.node, node.state);
+    this.nodes.push(node);
+  }
   this.cycle.add(node, node.id);
 }
 

@@ -45,6 +45,7 @@ Gossip.prototype.load = function load(cb) {
   this.db.open('gossip', function(err, doc) {
     if (err) return self.emit('error', err);
     self.doc = doc;
+    self.emit('loaded');
     cb();
   });
 };
@@ -73,24 +74,26 @@ function disseminate() {
   scheduleDisseminator.call(this);
 
   var nodes = this.node.cluster.nodes;
-  if (nodes && this.doc) {
+  if (nodes && nodes.length && this.doc) {
     var idx = Math.floor(Math.random() * nodes.length);
     var node = nodes[idx];
-    var stream = node.gossip();
-    var docStream = this.doc.createStream();
+    if (node != this.node) {
+      var stream = node.gossip();
+      var docStream = this.doc.createStream();
 
-    var timeout = setTimeout(handleDisseminateTimeout.bind(this, node),
-                             this._options.gossip_timeout);
+      var timeout = setTimeout(handleDisseminateTimeout.bind(this, node),
+                               this._options.gossip_timeout);
 
-    docStream.once('sync', function() {
-      docStream.end();
-      clearTimeout(timeout);
-    });
+      docStream.once('sync', function() {
+        docStream.end();
+        clearTimeout(timeout);
+      });
 
-    docStream.on('error', onDisseminateError.bind(this));
-    stream.on('error', onDisseminateError.bind(this));
+      docStream.on('error', onDisseminateError.bind(this));
+      stream.on('error', onDisseminateError.bind(this));
 
-    stream.pipe(docStream).pipe(stream);
+      stream.pipe(docStream).pipe(stream);
+    }
   }
 }
 
@@ -107,6 +110,20 @@ function onDisseminateError(err) {
 Gossip.prototype.stopDisseminator = function stopDisseminator() {
   clearTimeout(this.disseminator);
 }
+
+/// Meet
+
+Gossip.prototype.meet = function meet(node, cb) {
+  if (this.doc) {
+    this.doc.add(node);
+    if (cb) cb();
+  } else {
+    this.once('loaded', function() {
+      this.doc.add(node);
+      if (cb) cb();
+    });
+  }
+};
 
 /// Start and Stop Server
 
@@ -128,7 +145,7 @@ function handleConnection(connection) {
   connection.pipe(this.doc.createStream()).pipe(connection);
 }
 
-Gossip.prototype.stopServer = function startServer(cb) {
+Gossip.prototype.stopServer = function stopServer(cb) {
   var server = this.server;
   if (server && this._listening) {
     this._listening = false;

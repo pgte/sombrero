@@ -17,7 +17,7 @@ test('creates node', function(t) {
   node.once('initialized', t.end.bind(t));
 });
 
-test('gets a db', function(t) {
+test('gets a local db', function(t) {
   db = node.db('mydb');
   db.put('key1', 'value1', onPut);
 

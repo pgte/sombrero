@@ -9,7 +9,8 @@ var defaultOptions = {
   gossip_disseminate_interval: 1000,
   gossip_timeout:              10000,
   ephemeral_port_begin:        32768,
-  ephemeral_port_end:          61000
+  ephemeral_port_end:          61000,
+  join_cluster:                true
 };
 
 module.exports =
