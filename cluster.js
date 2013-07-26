@@ -30,7 +30,7 @@ Cluster.prototype.join = function join() {
 };
 
 Cluster.prototype.locate = function locate(dbName) {
-  this.cycle.locate(dbName);
+  return this.cycle.locate(dbName);
 };
 
 

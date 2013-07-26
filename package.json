@@ -25,17 +25,14 @@
     "level": "~0.10.0",
     "mkdirp": "~0.3.5",
     "async": "~0.2.9",
-    "stream-combiner": "0.0.2",
-    "split": "~0.2.6",
-    "through": "~2.3.4",
     "duplex-emitter": "~2.0.0",
     "node-uuid": "~1.4.0",
-    "level-net-client": "0.0.1",
-    "level-net-server": "0.0.1",
-    "light-cycle": "0.0.6",
+    "level-net-server": "~0.1.1",
+    "light-cycle": "~0.0.6",
     "crdt": "~3.5.2",
     "level-scuttlebutt": "~5.0.6",
-    "ip": "~0.1.0"
+    "ip": "~0.1.0",
+    "empty-port": "~0.0.1"
   },
   "devDependencies": {
     "tap": "*",

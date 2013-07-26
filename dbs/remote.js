@@ -2,7 +2,7 @@ var extend = require('util')._extend;
 var inherits = require('util').inherits;
 var EventEmitter = require('events').EventEmitter;
 
-var LocalDB = require('./local_db');
+var LocalDB = require('./local');
 
 var defaultOptions = {
   w: 2,

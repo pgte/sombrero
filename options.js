@@ -2,12 +2,14 @@ var extend = require('util')._extend;
 var assert = require('assert');
 
 var defaultOptions = {
-  base: process.cwd() + '/.sombrero',
-  isolated: false,
-  gossip: 9271,
-  broker: 9272,
+  base:                        process.cwd() + '/.sombrero',
+  isolated:                    false,
+  gossip:                      9271,
+  broker:                      9272,
   gossip_disseminate_interval: 1000,
-  gossip_timeout: 10000
+  gossip_timeout:              10000,
+  ephemeral_port_begin:        32768,
+  ephemeral_port_end:          61000
 };
 
 module.exports =

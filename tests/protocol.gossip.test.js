@@ -87,5 +87,3 @@ test('gossip is still there', function(t) {
 test('closes node', function(t) {
   node.close(t.end.bind(t));
 });
-
-function xtest() {}
