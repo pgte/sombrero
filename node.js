@@ -152,6 +152,21 @@ Node.prototype.advertising = function() {
 };
 
 
+/// db
+
+Node.prototype.db = function db(name) {
+  var node = this.cluster.locate(name);
+  var db;
+  if (node == this)
+    db = this.dbs.local(name);
+  else {
+    db = this.dbs.remote(name, node.host, node.broker);
+  }
+
+  return db;
+};
+
+
 /// close
 
 Node.prototype.close = function close(cb) {

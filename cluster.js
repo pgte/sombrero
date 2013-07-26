@@ -37,9 +37,10 @@ Cluster.prototype.locate = function locate(dbName) {
 // Node set change listeners coming from gossip
 
 function handleNewNode(node) {
-  var remoteNode = RemoteNode(node.state);
-  this.nodes.push(remoteNode);
-  this.cycle.add(remoteNode, node.id);
+  if (node.id == this.node.id) node = this.node;
+  else node = RemoteNode(node.state);
+  this.nodes.push(node);
+  this.cycle.add(node, node.id);
 }
 
 function handleChangedNode(node, changed) {

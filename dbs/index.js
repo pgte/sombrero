@@ -18,10 +18,10 @@ function DBs(node, options) {
   this._servers = {};
 }
 
-DBs.prototype.remote = function db(name, options) {
+DBs.prototype.remote = function db(name, host, port) {
   var db = this._remoteDBs[name];
   if (! db) {
-    db = this._remoteDBs[name] = RemoteDB(this.node, name, this._options);
+    db = this._remoteDBs[name] = RemoteDB(name, host, port, this._options);
     db.once('closed', onRemoteDbClosed.bind(this, name));
   }
 
